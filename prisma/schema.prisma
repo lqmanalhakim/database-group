@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Donor {
+  DonorID       Int        @id @default(autoincrement())
+  Name          String
+  ContactInfo   String
+  Address       String?
+  DonationTotal Int?
+  Donation      Donation[]
+  Reports       Reports[]
+}
+
+model Volunteer {
+  VolunteerID         Int                   @id @default(autoincrement())
+  Name                String
+  ContactInfo         String
+  Skills              String?
+  Availability        Int
+  VolunteerActivities VolunteerActivities[]
+  Reports             Reports[]
+}
+
+model Event {
+  EventID             Int                   @id @default(autoincrement())
+  EventName           String
+  EventDate           DateTime
+  Location            String?
+  Description         String?
+  Donation            Donation[]
+  VolunteerActivities VolunteerActivities[]
+  Reports             Reports[]
+}
+
+model Donation {
+  DonationID   Int       @id @default(autoincrement())
+  DonorID      Int
+  Amount       Float
+  DonationDate DateTime
+  EventID      Int?
+  Donor        Donor     @relation(fields: [DonorID], references: [DonorID])
+  Event        Event?    @relation(fields: [EventID], references: [EventID])
+  Reports      Reports[]
+}
+
+model VolunteerActivities {
+  ActivityID   Int       @id @default(autoincrement())
+  VolunteerID  Int
+  EventID      Int
+  HoursWorked  Float
+  ActivityDate DateTime
+  Volunteer    Volunteer @relation(fields: [VolunteerID], references: [VolunteerID])
+  Event        Event     @relation(fields: [EventID], references: [EventID])
+  Reports      Reports[]
+}
+
+model Reports {
+  ReportID          Int                  @id @default(autoincrement())
+  ReportType        String
+  GeneratedDate     DateTime
+  Content           String
+  DonorID           Int?
+  DonationID        Int?
+  VolunteerID       Int?
+  ActivityID        Int?
+  EventID           Int?
+  Donor             Donor?               @relation(fields: [DonorID], references: [DonorID])
+  Donation          Donation?            @relation(fields: [DonationID], references: [DonationID])
+  Volunteer         Volunteer?           @relation(fields: [VolunteerID], references: [VolunteerID])
+  VolunteerActivity VolunteerActivities? @relation(fields: [ActivityID], references: [ActivityID])
+  Event             Event?               @relation(fields: [EventID], references: [EventID])
+}
